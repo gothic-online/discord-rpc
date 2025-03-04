@@ -24,35 +24,37 @@ extern "C" {
 #endif
 
 typedef struct DiscordButton {
-    const char* label; /* TODO: max 128 bytes? */
-    const char* url;   /* TODO: would be reasonable to expect it to be >=128 bytes? */
+    uint8_t active;
+    char label[129]; // max 128 bytes + null terminatior = 129
+    char url[513];   // max 512 bytes + null terminator = 513
 } DiscordButton;
 
 typedef struct DiscordRichPresence {
-    const char* state;   /* max 128 bytes */
-    const char* details; /* max 128 bytes */
+    char state[129];   // max 128 bytes + null terminator = 129
+    char details[129]; // max 128 bytes + null terminator = 129
     int64_t startTimestamp;
     int64_t endTimestamp;
-    const char* largeImageKey;  /* max 32 bytes */
-    const char* largeImageText; /* max 128 bytes */
-    const char* smallImageKey;  /* max 32 bytes */
-    const char* smallImageText; /* max 128 bytes */
-    const char* partyId;        /* max 128 bytes */
+    char largeImageKey[33];   // max 32 bytes + null terminator = 33
+    char largeImageText[129]; // max 128 bytes + null terminator = 129
+    char smallImageKey[33];   // max 32 bytes + null terminator = 33
+    char smallImageText[129]; // max 128 bytes + null terminator = 129
+    char partyId[129];        // max 128 bytes + null terminator = 129
     int partySize;
     int partyMax;
     int partyPrivacy;
-    const char* matchSecret;    /* max 128 bytes */
-    const char* joinSecret;     /* max 128 bytes */
-    const char* spectateSecret; /* max 128 bytes */
+    char matchSecret[129];    // max 128 bytes + null terminator = 129
+    char joinSecret[129];     // max 128 bytes + null terminator = 129
+    char spectateSecret[129]; // max 128 bytes + null terminator = 129
     int8_t instance;
-    const DiscordButton* buttons;
+    DiscordButton button1;
+    DiscordButton button2;
 } DiscordRichPresence;
 
 typedef struct DiscordUser {
-    const char* userId;
-    const char* username;
-    const char* discriminator;
-    const char* avatar;
+    char userId[32]; // snowflake (64bit int), turned into a ascii decimal string, at most 20 chars +1 null terminator = 21
+    char username[344]; // 32 unicode glyphs is max name size => 4 bytes per glyph in the worst case, +1 for null terminator = 129
+    char discriminator[8]; // 4 decimal digits + 1 null terminator = 5
+    char avatar[128]; // optional 'a_' + md5 hex digest (32 bytes) + null terminator = 35
 } DiscordUser;
 
 typedef struct DiscordEventHandlers {

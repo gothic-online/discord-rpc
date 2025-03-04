@@ -32,20 +32,6 @@ struct QueuedMessage {
     }
 };
 
-struct User {
-    // snowflake (64bit int), turned into a ascii decimal string, at most 20 chars +1 null
-    // terminator = 21
-    char userId[32];
-    // 32 unicode glyphs is max name size => 4 bytes per glyph in the worst case, +1 for null
-    // terminator = 129
-    char username[344];
-    // 4 decimal digits + 1 null terminator = 5
-    char discriminator[8];
-    // optional 'a_' + md5 hex digest (32 bytes) + null terminator = 35
-    char avatar[128];
-    // Rounded way up because I'm paranoid about games breaking from future changes in these sizes
-};
-
 static RpcConnection* Connection{nullptr};
 static DiscordEventHandlers QueuedHandlers{};
 static DiscordEventHandlers Handlers{};
@@ -65,8 +51,8 @@ static std::mutex PresenceMutex;
 static std::mutex HandlerMutex;
 static QueuedMessage QueuedPresence{};
 static MsgQueue<QueuedMessage, MessageQueueSize> SendQueue;
-static MsgQueue<User, JoinQueueSize> JoinAskQueue;
-static User connectedUser;
+static MsgQueue<DiscordUser, JoinQueueSize> JoinAskQueue;
+static DiscordUser connectedUser;
 
 // We want to auto connect, and retry on failure, but not as fast as possible. This does expoential
 // backoff from 0.5 seconds to 1 minute
@@ -421,11 +407,7 @@ extern "C" DISCORD_EXPORT void Discord_RunCallbacks(void)
     if (WasJustConnected.exchange(false)) {
         std::lock_guard<std::mutex> guard(HandlerMutex);
         if (Handlers.ready) {
-            DiscordUser du{connectedUser.userId,
-                           connectedUser.username,
-                           connectedUser.discriminator,
-                           connectedUser.avatar};
-            Handlers.ready(&du);
+            Handlers.ready(&connectedUser);
         }
     }
 
@@ -460,8 +442,7 @@ extern "C" DISCORD_EXPORT void Discord_RunCallbacks(void)
         {
             std::lock_guard<std::mutex> guard(HandlerMutex);
             if (Handlers.joinRequest) {
-                DiscordUser du{req->userId, req->username, req->discriminator, req->avatar};
-                Handlers.joinRequest(&du);
+                Handlers.joinRequest(req);
             }
         }
         JoinAskQueue.CommitSend();

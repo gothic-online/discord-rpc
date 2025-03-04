@@ -37,20 +37,20 @@ static void updateDiscordPresence()
         char buffer[256];
         DiscordRichPresence discordPresence;
         memset(&discordPresence, 0, sizeof(discordPresence));
-        discordPresence.state = "West of House";
+        strcpy_s(discordPresence.state, sizeof(discordPresence.state), "West of House");
         sprintf(buffer, "Frustration level: %d", FrustrationLevel);
-        discordPresence.details = buffer;
+        strcpy_s(discordPresence.details, sizeof(discordPresence.details), buffer);
         discordPresence.startTimestamp = StartTime;
         discordPresence.endTimestamp = time(0) + 5 * 60;
-        discordPresence.largeImageKey = "canary-large";
-        discordPresence.smallImageKey = "ptb-small";
-        discordPresence.partyId = "party1234";
+        strcpy_s(discordPresence.largeImageKey, sizeof(discordPresence.largeImageKey), "canary-large");
+        strcpy_s(discordPresence.smallImageKey, sizeof(discordPresence.smallImageKey), "ptb-small");
+        strcpy_s(discordPresence.partyId, sizeof(discordPresence.partyId), "party1234");
         discordPresence.partySize = 1;
         discordPresence.partyMax = 6;
         discordPresence.partyPrivacy = DISCORD_PARTY_PUBLIC;
-        discordPresence.matchSecret = "xyzzy";
-        discordPresence.joinSecret = "join";
-        discordPresence.spectateSecret = "look";
+        strcpy_s(discordPresence.matchSecret, sizeof(discordPresence.matchSecret), "xyzzy");
+        strcpy_s(discordPresence.joinSecret, sizeof(discordPresence.joinSecret), "join");
+        strcpy_s(discordPresence.spectateSecret, sizeof(discordPresence.spectateSecret), "look");
         discordPresence.instance = 0;
         Discord_UpdatePresence(&discordPresence);
     }
